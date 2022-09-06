@@ -1,7 +1,9 @@
 # tinypybits
-Repository for minimal examples for some python problems and solutions
+Repository for minimal examples for some python problems and solution ideas
 
-## IO
+## I/O
+_Reading, writting, transfering data_
+
 how to zip data (for example csv) in memory into bytes buffer that can be saved on disk:
 - [in_memory_zip.py](/io/in_memory_zip.py)
 
