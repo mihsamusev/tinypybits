@@ -7,6 +7,7 @@ from io import BytesIO, StringIO
 
 app = FastAPI()
 
+
 @app.get("/download/{data_id}")
 async def get_zipped(data_id: int):
     # get csv data (from db for example)
@@ -16,7 +17,7 @@ async def get_zipped(data_id: int):
     return StreamingResponse(
         iter([zipped.getvalue()]),
         media_type="application/x-zip-compressed",
-        headers = { "Content-Disposition": f"attachment;filename={data_id}.zip"}
+        headers={"Content-Disposition": f"attachment;filename={data_id}.zip"},
     )
 
 
@@ -25,11 +26,7 @@ def create_csv_string() -> StringIO:
     dummy stringIO object representing a CSV
     """
     fstream = StringIO()
-    data = [
-        ("price", 1),
-        ("generation", 2),
-        ("stuff", 3)
-    ]
+    data = [("price", 1), ("generation", 2), ("stuff", 3)]
     csv.writer(fstream).writerows(data)
     return fstream
 
@@ -44,6 +41,7 @@ def zip_string(file_name: str, data: StringIO) -> BytesIO:
 
     return buffer
 
-if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=8005)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8005)
     print("running")
