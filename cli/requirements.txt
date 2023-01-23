@@ -1,0 +1,5 @@
+fastapi
+typer
+starlette
+uvicorn
+httpx
