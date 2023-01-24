@@ -24,7 +24,7 @@ def get_user(db, username: str):
         user_dict = db[username]
         return UserDB(**user_dict)
 
-def fake_hash_password(password: str):
+def hash_password(password: str):
     return "fakehashed" + password
 
 
@@ -36,6 +36,9 @@ app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
+    """
+    Given the token, who is the user?
+    """
     user = fake_decode_token(token)
     if not user:
         raise HTTPException(
@@ -47,17 +50,22 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 @app.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Verify username and password -> give token
+    predefined OAuth2 form_data (username, password, scope[])
+    """
     user_dict = fake_users_db.get(form_data.username)
     if not user_dict:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
     user = UserDB(**user_dict)
-    hashed_password = fake_hash_password(form_data.password)
+    hashed_password = hash_password(form_data.password)
 
     if not hashed_password == user.hashed_password:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-    return {"access_token": user.username, "token_type": "bearer"}
+    response = {"access_token": user.username, "token_type": "bearer"}
+    return response
 
 
 @app.get("/good_stuff")
