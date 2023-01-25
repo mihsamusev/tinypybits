@@ -3,3 +3,4 @@ typer
 starlette
 uvicorn
 httpx
+python-jose[cryptography]
