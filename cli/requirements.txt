@@ -3,4 +3,6 @@ typer
 starlette
 uvicorn
 httpx
+passlib[bcrypt]
 python-jose[cryptography]
+python-dotenv
