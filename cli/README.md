@@ -7,3 +7,13 @@ curl http:localhost:8888/token -F username=alice -F password=secret
 # then use the bearer for the requests (Otherwise will 401)
 curl http://localhost:8888/good_stuff -H 'Authorization: Bearer alice'
 ```
+
+
+#
+```python
+class Link
+    url: PydanticUrl
+    tags: []
+    datetime_created: datetime
+    creator: User
+```

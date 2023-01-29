@@ -7,61 +7,52 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
+from model import User
+from repository.in_memory_db import InMemoryUsersDB, get_users_db
+
 load_dotenv()
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ASSESS_JWT_EXPIRE_MINUTES = os.getenv("ACCESS_JWT_EXPIRE_MINUTES")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+ALGORITHM = os.getenv("JWT_ALGORITHM")
+ASSESS_JWT_EXPIRE_MINUTES = os.getenv("JWT_TOKEN_EXPIRE_MINUTES")
 
-class User(BaseModel):
-    username: str
-
-
-class UserDB(User):
-    hashed_password: str
 
 class Token(BaseModel):
     assess_token: str
     token_type: str
 
-class Tokendata(BaseModel):
+
+class TokenPayload(BaseModel):
     username: str
-
-
-fake_users_db = {
-    "alice": {"username": "alice", "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"},
-}
-
-
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserDB(**user_dict)
 
 
 def hash_password(password: str):
     return "fakehashed" + password
 
 
-def fake_decode_token(token):
-    return get_user(fake_users_db, token)
-
+def fake_decode_token(db: InMemoryUsersDB, token):
+    db_user = db.get_user(username=token)
+    return User(db_user) 
 
 app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
 
 def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(
+    db: InMemoryUsersDB = Depends(get_users_db), token: str = Depends(oauth2_scheme)
+):
     """
     Given the token, who is the user?
     """
-    user = fake_decode_token(token)
+    user = fake_decode_token(db, token)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -72,16 +63,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 @app.post("/token")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(db: InMemoryUsersDB = Depends(get_users_db), form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Verify username and password -> give token
     predefined OAuth2 form_data (username, password, scope[])
     """
-    user_dict = fake_users_db.get(form_data.username)
-    if not user_dict:
+    user = db.get_user(form_data.username)
+    if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-    user = UserDB(**user_dict)
     hashed_password = hash_password(form_data.password)
 
     if not hashed_password == user.hashed_password:
