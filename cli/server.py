@@ -1,83 +1,68 @@
-import os
 
-from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+from jose import JWTError
 from pydantic import BaseModel
 
+import auth
 from model import User
 from repository.in_memory_db import InMemoryUsersDB, get_users_db
 
-load_dotenv()
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-ALGORITHM = os.getenv("JWT_ALGORITHM")
-ASSESS_JWT_EXPIRE_MINUTES = os.getenv("JWT_TOKEN_EXPIRE_MINUTES")
-
-
-class Token(BaseModel):
-    assess_token: str
-    token_type: str
-
-
-class TokenPayload(BaseModel):
-    username: str
-
-
-def hash_password(password: str):
-    return "fakehashed" + password
-
-
-def fake_decode_token(db: InMemoryUsersDB, token):
-    db_user = db.get_user(username=token)
-    return User(db_user) 
-
 app = FastAPI()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# keeper of the jwt token of the currently logged in user
+# once token is set through POST <tokenURL>
+# the scheme will look for 
+# Bearer + token in the Authorization header of the request
+# and compare to the token it keeps
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+def login_exception(detail: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=detail,
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
 
 
 async def get_current_user(
-    db: InMemoryUsersDB = Depends(get_users_db), token: str = Depends(oauth2_scheme)
+    db: InMemoryUsersDB = Depends(get_users_db),
+    encoded_token: str = Depends(oauth2_scheme)
 ):
-    """
-    Given the token, who is the user?
-    """
-    user = fake_decode_token(db, token)
+    print(f"found token: {encoded_token}")
+    try:
+        payload = auth.decode_token(encoded_token)
+    except JWTError:
+        raise login_exception("Login session has expired")
+
+    username = payload.sub
+    if not username:
+        raise login_exception("Invalid authentification credentials")
+
+    user = db.get_user(username=username)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentification credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise login_exception("Invalid authentification credentials")
+
     return user
 
 
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+
 @app.post("/token")
-async def login(db: InMemoryUsersDB = Depends(get_users_db), form_data: OAuth2PasswordRequestForm = Depends()):
-    """
-    Verify username and password -> give token
-    predefined OAuth2 form_data (username, password, scope[])
-    """
-    user = db.get_user(form_data.username)
+async def login_for_access_token(
+    db: InMemoryUsersDB = Depends(get_users_db),
+    form: OAuth2PasswordRequestForm = Depends()
+    ):
+    user = auth.authenticate_user(db, form.username, form.password)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-    hashed_password = hash_password(form_data.password)
-
-    if not hashed_password == user.hashed_password:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-
-    response = {"access_token": user.username, "token_type": "bearer"}
+    token = auth.create_access_token(sub=user.username)
+    response = TokenResponse(access_token=token, token_type="bearer")
     return response
 
 
