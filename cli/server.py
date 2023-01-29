@@ -36,7 +36,7 @@ async def get_current_user(
     except JWTError:
         raise login_exception("Login session has expired")
 
-    username = payload.sub
+    username = payload.get_subject()
     if not username:
         raise login_exception("Invalid authentification credentials")
 
@@ -61,11 +61,11 @@ async def login_for_access_token(
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-    token = auth.create_access_token(sub=user.username)
+    token = auth.create_access_token(subject=user.username)
     response = TokenResponse(access_token=token, token_type="bearer")
     return response
 
 
 @app.get("/good_stuff")
 async def good_stuff(user: User = Depends(get_current_user)):
-    return user
+    return {"response": "welcome back " + user.username}

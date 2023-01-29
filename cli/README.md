@@ -8,6 +8,7 @@ curl http:localhost:8888/token -F username=alice -F password=secret
 curl http://localhost:8888/good_stuff -H 'Authorization: Bearer alice'
 ```
 
+How to login with token without expiration?
 
 #
 ```python

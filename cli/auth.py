@@ -20,6 +20,9 @@ class TokenPayload(BaseModel):
     sub: str
     exp: datetime
 
+    def get_subject(self):
+        return self.sub
+
 
 def verify_password(raw_password: str, hashed_password: str):
     return password_context.verify(raw_password, hashed_password)
@@ -38,11 +41,11 @@ def authenticate_user(db, username: str, raw_password: str):
     return db_user
 
 
-def create_access_token(sub: str) -> str:
+def create_access_token(subject: str) -> str:
     expiration_datetime = datetime.utcnow() + timedelta(
         minutes=JWT_TOKEN_EXPIRE_MINUTES
     )
-    payload = TokenPayload(sub=sub, exp=expiration_datetime)
+    payload = TokenPayload(sub=subject, exp=expiration_datetime)
     return jwt.encode(payload.dict(), JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
