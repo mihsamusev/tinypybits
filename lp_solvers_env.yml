@@ -1,0 +1,14 @@
+# conda env create -f lp_solvers_env.yml
+# conda env update -f lp_solvers_env.yml
+name: lp_solvers
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.10
+  - pip
+  - numpy
+  - pyomo
+  - glpk
+  - scip
+  - ipopt

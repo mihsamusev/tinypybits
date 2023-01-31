@@ -139,19 +139,18 @@ def display_results(model):
     print("\n".join(results))
 
 
-def main():
-    SOLVER_NAME = "mindtpy"
+def main(solver_name):
     horizon_hours = 3
     model = build_model_with_time(horizon_hours)
     # model = build_model_without_time()
 
     # model.pprint(open("model_internals_before.txt", "w"))
 
-    solver = pyo.SolverFactory(SOLVER_NAME)
+    solver = pyo.SolverFactory(solver_name)
     solver.solve(model)
     display_results(model)
     # model.pprint(open("model_internals_after.txt", "w"))
 
 
 if __name__ == "__main__":
-    main()
+    main(solver_name="ipopt")
