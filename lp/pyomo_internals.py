@@ -39,32 +39,31 @@ def build_model_without_time():
     )
 
     model.electrolyzer_h2_output = pyo.Var(
-        bounds=(0, Electrolyzer.h2_ouptut_capacity),
-        domain=pyo.NonNegativeReals
+        bounds=(0, Electrolyzer.h2_ouptut_capacity), domain=pyo.NonNegativeReals
     )
 
     model.h2_consumer_h2_input = pyo.Var(
-        bounds=(0, H2Consumer.h2_input_capacity),
-        domain=pyo.NonNegativeReals
+        bounds=(0, H2Consumer.h2_input_capacity), domain=pyo.NonNegativeReals
     )
 
     model.add_component(
         "electrolyzer power input cant be more than poweer source power",
-        pyo.Constraint(expr=model.electrolyzer_power_input <= model.power_available)
+        pyo.Constraint(expr=model.electrolyzer_power_input <= model.power_available),
     )
     model.add_component(
         "electrolyzer sends h2 to consumer without losses",
-        pyo.Constraint(expr=model.electrolyzer_h2_output == model.h2_consumer_h2_input)
+        pyo.Constraint(expr=model.electrolyzer_h2_output == model.h2_consumer_h2_input),
     )
 
     model.add_component(
         "linear conversion between produced h2 and consumed power",
-        pyo.Constraint(expr=model.electrolyzer_power_input == Electrolyzer().efficiency_curve_slope
-        * model.electrolyzer_h2_output + Electrolyzer.efficiency_curve_offset)
+        pyo.Constraint(
+            expr=model.electrolyzer_power_input
+            == Electrolyzer().efficiency_curve_slope * model.electrolyzer_h2_output
+            + Electrolyzer.efficiency_curve_offset
+        ),
     )
-    model.objective = pyo.Objective(expr=model.h2_consumer_h2_input,
-        sense=pyo.maximize
-    )
+    model.objective = pyo.Objective(expr=model.h2_consumer_h2_input, sense=pyo.maximize)
 
     return model
 
@@ -89,15 +88,14 @@ def build_model_with_time(horizon_hours):
     model.electrolyzer_h2_output = pyo.Var(
         model.time,
         bounds=(0, Electrolyzer.h2_ouptut_capacity),
-        domain=pyo.NonNegativeReals
+        domain=pyo.NonNegativeReals,
     )
 
     model.h2_consumer_h2_input = pyo.Var(
         model.time,
         bounds=(0, H2Consumer.h2_input_capacity),
-        domain=pyo.NonNegativeReals
+        domain=pyo.NonNegativeReals,
     )
-
 
     # model.add_component(
     #     "electrolyzer power input cant be more than power",
@@ -116,8 +114,10 @@ def build_model_with_time(horizon_hours):
         "electrolyzer power input cant be more than power",
         pyo.Constraint(
             model.time,
-            rule=lambda model, t: pyo.expr.current.InequalityExpression((sum_lefts(t), sum_rights(t)), strict=False)
-        )
+            rule=lambda model, t: pyo.expr.current.InequalityExpression(
+                (sum_lefts(t), sum_rights(t)), strict=False
+            ),
+        ),
     )
 
     model.add_component(
@@ -139,33 +139,29 @@ def build_model_with_time(horizon_hours):
         ),
     )
     model.objective = pyo.Objective(
-        expr=pyo.quicksum(model.h2_consumer_h2_input[:]),
-        sense=pyo.maximize
+        expr=pyo.quicksum(model.h2_consumer_h2_input[:]), sense=pyo.maximize
     )
 
     return model
 
 
 def display_results(model):
-    results = [] 
+    results = []
     for name, var in model.component_map(ctype=[pyo.Var, pyo.Param]).items():
         result = f"{name} -> {var.extract_values()}"
         results.append(result)
-    
+
     print("\n".join(results))
 
 
 def main():
     horizon_hours = 3
     model = build_model_with_time(horizon_hours)
-    #model = build_model_without_time()
-    
+    # model = build_model_without_time()
+
     model.pprint(open("model_internals_before.txt", "w"))
 
-    solver = pyo.SolverFactory(
-        "scipampl",
-        executable=r"C:\solvers\scipampl.exe"
-    )
+    solver = pyo.SolverFactory("scipampl", executable=r"C:\solvers\scipampl.exe")
     solver.solve(model)
     display_results(model)
     model.pprint(open("model_internals_after.txt", "w"))

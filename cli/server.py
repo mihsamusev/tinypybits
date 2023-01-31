@@ -1,4 +1,3 @@
-
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError
@@ -12,10 +11,11 @@ app = FastAPI()
 
 # keeper of the jwt token of the currently logged in user
 # once token is set through POST <tokenURL>
-# the scheme will look for 
+# the scheme will look for
 # Bearer + token in the Authorization header of the request
 # and compare to the token it keeps
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 def login_exception(detail: str) -> HTTPException:
     return HTTPException(
@@ -25,10 +25,9 @@ def login_exception(detail: str) -> HTTPException:
     )
 
 
-
 async def get_current_user(
     db: InMemoryUsersDB = Depends(get_users_db),
-    encoded_token: str = Depends(oauth2_scheme)
+    encoded_token: str = Depends(oauth2_scheme),
 ):
     print(f"found token: {encoded_token}")
     try:
@@ -55,8 +54,8 @@ class TokenResponse(BaseModel):
 @app.post("/token")
 async def login_for_access_token(
     db: InMemoryUsersDB = Depends(get_users_db),
-    form: OAuth2PasswordRequestForm = Depends()
-    ):
+    form: OAuth2PasswordRequestForm = Depends(),
+):
     user = auth.authenticate_user(db, form.username, form.password)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")

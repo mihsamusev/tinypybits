@@ -17,7 +17,8 @@ class InMemoryUsersDB:
         self._users_db = [
             UserInDB(
                 username="alice",
-                hashed_password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW")
+                hashed_password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+            )
         ]
 
     def get_user(self, username: str) -> Optional[UserInDB]:

@@ -6,7 +6,6 @@ from jose import jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from model import User
 
 load_dotenv()
 
@@ -15,6 +14,7 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
 JWT_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_TOKEN_EXPIRE_MINUTES"))
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 class TokenPayload(BaseModel):
     sub: str

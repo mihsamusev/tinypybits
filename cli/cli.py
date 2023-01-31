@@ -7,8 +7,9 @@ app = typer.Typer()
 
 @app.command()
 def hello():
-    response = requests.get(url=ENDPOINT)
-    print(response.json())
+    # response = requests.get(url=ENDPOINT)
+    # print(response.json())
+    print("hello")
 
 
 if __name__ == "__main__":
@@ -21,4 +22,3 @@ if __name__ == "__main__":
 #       - no -> ask to login again
 
 # - no -> login -> put token in local storage
-
