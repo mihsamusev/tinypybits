@@ -145,12 +145,12 @@ def main():
     model = build_model_with_time(horizon_hours)
     # model = build_model_without_time()
 
-    model.pprint(open("model_internals_before.txt", "w"))
+    # model.pprint(open("model_internals_before.txt", "w"))
 
     solver = pyo.SolverFactory(SOLVER_NAME)
     solver.solve(model)
     display_results(model)
-    model.pprint(open("model_internals_after.txt", "w"))
+    # model.pprint(open("model_internals_after.txt", "w"))
 
 
 if __name__ == "__main__":

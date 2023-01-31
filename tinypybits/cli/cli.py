@@ -1,4 +1,3 @@
-import requests
 import typer
 
 ENDPOINT = "http://localhost:8888"

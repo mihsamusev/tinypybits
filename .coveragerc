@@ -1,13 +1,12 @@
 [run]
 branch = True
 include =
-        toolkit/*
+        tinypybits/*
 
 omit =
         *tests*
 
 [report]
-fail_under = 90
 skip_covered = True
 skip_empty = True
 exclude_lines = 

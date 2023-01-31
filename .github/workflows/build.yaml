@@ -21,8 +21,5 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install .[dev]
 
-    - name: test, lint, coverage
-      run: |
-        coverage run -m pytest
-        coverage report
-        flake8 .
+    - name: Test with tox
+      run: tox
