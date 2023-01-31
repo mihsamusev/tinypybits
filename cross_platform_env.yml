@@ -1,11 +1,11 @@
-# conda create env -f env.yml
-# conda env update -f env.yml
-name: env
+# conda create env -f cross_platform_env.yml
+# conda env update -f cross_flatform_env.yml
+name: solvers
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.10
+  - python>=3.10
   - pip
   - glpk
   - ipopt
