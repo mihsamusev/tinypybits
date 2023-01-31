@@ -1,18 +1,11 @@
 # conda create env -f env.yml
 # conda env update -f env.yml
-name: pyomo
+name: env
 channels:
   - conda-forge
   - defaults
 dependencies:
   - python=3.10
   - pip
-  - pyomo
   - glpk
   - ipopt
-  - numpy
-  - pandas
-  - openpyxl
-  - pytest
-  - pyarrow
-  - tox-conda
