@@ -1,0 +1,28 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:          
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python-version: ['3.10']
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install .[dev]
+
+    - name: test, lint, coverage
+      run: |
+        coverage run -m pytest
+        coverage report
+        flake8 .
