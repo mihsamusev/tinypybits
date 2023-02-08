@@ -116,16 +116,22 @@ def build_model_with_time(horizon_hours):
 
     model.add_component(
         "linear conversion between produced h2 and consumed power",
-        pyo.Constraint(
+        pyo.Constraint(  
             model.time,
             rule=lambda model, t: model.electrolyzer_power_input[t]
             == Electrolyzer().efficiency_curve_slope * model.electrolyzer_h2_output[t]
             + Electrolyzer.efficiency_curve_offset,
         ),
     )
-    model.objective = pyo.Objective(
-        expr=pyo.quicksum(model.h2_consumer_h2_input[:]), sense=pyo.maximize
-    )
+
+
+    def h2_consumer_h2_input():
+        return (model.h2_consumer_h2_input[t] for t in model.time)
+
+    model.objective = pyo.Objective(expr=pyo.quicksum(h2_consumer_h2_input()), sense=pyo.maximize)
+#    model.objective = pyo.Objective(
+#        expr=pyo.quicksum(model.h2_consumer_h2_input[:]), sense=pyo.maximize
+#    )
 
     return model
 
@@ -153,4 +159,4 @@ def main(solver_name):
 
 
 if __name__ == "__main__":
-    main(solver_name="ipopt")
+    main(solver_name="glpk")
