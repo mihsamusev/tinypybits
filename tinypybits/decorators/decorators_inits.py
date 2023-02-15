@@ -15,6 +15,18 @@ class Variable:
 class ModelObject:
     def display(self):
         print("im model class")
+    
+    def __new__(cls, *args, **kwargs):
+        """
+        maybe we wanna initialize methods here
+        second idea, use types.MethodType(my_method, target_object)
+        """
+        print("im new model object with functions:")
+        public_methods = inspect.getmembers(cls, predicate=inspect.isfunction)
+        for method_name, method_callable in public_methods:
+            setattr(cls, method_name, method_callable)
+            print(f"\t{method_name} @ {id(method_callable)}")
+        return super().__new__(cls, *args, **kwargs)
 
 
 class PowerInput(Variable):
@@ -63,6 +75,8 @@ def add_variables(variables: List[Variable]):
 class ElectrolyzerTK(ModelObject):
     def __init__(self):
         print("elect initialized")
+
+
 
 
 @add_variables([PowerInput, H2Output])
