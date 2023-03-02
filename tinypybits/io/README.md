@@ -1,0 +1,2 @@
+- [fast unzipping](https://superfastpython.com/multithreaded-unzip-files/#Unzip_Files_Concurrently_with_AsyncIO_in_Batch)
+- [concurency learning paths](https://superfastpython.com/learning-paths/)

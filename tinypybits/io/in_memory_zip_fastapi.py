@@ -4,7 +4,10 @@ import uvicorn
 import zipfile
 import csv
 from io import BytesIO, StringIO
+import asyncio
 
+
+REQUEST_LATENCY_SECONDS = 1
 app = FastAPI()
 
 
@@ -13,6 +16,8 @@ async def get_zipped(data_id: int):
     # get csv data (from db for example)
     csv_string = create_csv_string()
     zipped = zip_string(file_name=f"{data_id}.csv", data=csv_string)
+
+    await asyncio.sleep(REQUEST_LATENCY_SECONDS)
 
     return StreamingResponse(
         iter([zipped.getvalue()]),

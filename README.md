@@ -20,3 +20,6 @@ How to create pandas dataframes with its synchronous read API but asynchronously
 
 How to support reading pandas dataframes of multiple formats with a single function
 - TODObump
+
+- dockerize -> to regirstry
+- correlation IDs https://dddinpython.com/index.php/2021/09/02/request-logging-how-to/
