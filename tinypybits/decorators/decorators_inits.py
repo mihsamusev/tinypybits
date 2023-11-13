@@ -15,7 +15,7 @@ class Variable:
 class ModelObject:
     def display(self):
         print("im model class")
-    
+
     def __new__(cls, *args, **kwargs):
         """
         maybe we wanna initialize methods here
@@ -75,8 +75,6 @@ def add_variables(variables: List[Variable]):
 class ElectrolyzerTK(ModelObject):
     def __init__(self):
         print("elect initialized")
-
-
 
 
 @add_variables([PowerInput, H2Output])
